@@ -41,3 +41,38 @@ maxMaybe left@(Just x) right@(Just y) = case compare x y of
                                   LT => right
                                   EQ => left
                                   GT => left
+
+
+data Shape =
+   Triangle Double Double
+  | Rectangle Double Double
+  | Circle Double
+
+
+data Picture =
+   Primitive Shape
+  | Combine Picture Picture
+  | Rotate Double Picture
+  | Translate Double Double Picture
+
+biggestTriangle : Picture -> Maybe Double
+biggestTriangle (Primitive x) = case x of
+                                  Triangle d1 d2 => Just (d1 + d2)
+                                  _ => Nothing
+biggestTriangle (Combine x y) =
+                let fst = biggestTriangle x in
+                let snd = biggestTriangle y in
+                case fst of
+                  Just tr => case snd of
+                              Just tr2 => if tr > tr2 then fst else snd
+                              Nothing => fst
+                  Nothing => snd
+biggestTriangle (Rotate _ y) = biggestTriangle y
+biggestTriangle (Translate _ _ z) = biggestTriangle z
+
+
+pic1 : Picture
+pic1 = Combine (Primitive (Triangle 2 3)) (Primitive (Triangle 2 4))
+
+pic2 : Picture
+pic2 = Combine (Primitive (Rectangle 1 3)) (Primitive (Circle 4))
